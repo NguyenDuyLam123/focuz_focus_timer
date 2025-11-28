@@ -15,7 +15,10 @@ class _TaskScreenState extends State<TaskScreen> {
   @override
   void initState() {
     super.initState();
-    controller.loadTasks().then((_) => setState(() {}));
+    controller.loadTasks().then((_) {
+      if (!mounted) return; // ← IMPORTANT
+      setState(() {});
+    });
   }
 
   void addTaskDialog() {
@@ -28,6 +31,9 @@ class _TaskScreenState extends State<TaskScreen> {
           TextButton(
             onPressed: () async {
               await controller.addTask(input.text);
+
+              if (!mounted) return;
+
               input.clear();
               setState(() {});
               Navigator.pop(context);
@@ -61,6 +67,9 @@ class _TaskScreenState extends State<TaskScreen> {
               icon: const Icon(Icons.delete),
               onPressed: () async {
                 await controller.deleteTask(task.id);
+
+                if (!mounted) return;
+
                 setState(() {});
               },
             ),
