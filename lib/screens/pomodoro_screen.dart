@@ -78,7 +78,8 @@ class _PomodoroScreenState extends State<PomodoroScreen>
   @override
   Widget build(BuildContext context) {
     final running = controller.isRunning;
-    final Task? task = ModalRoute.of(context)!.settings.arguments as Task?;
+    final Task? task = ModalRoute.of(context)?.settings.arguments as Task?;
+
     if (task == null) {
       return const Scaffold(
         body: Center(
