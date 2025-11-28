@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../models/task.dart';
+import 'task_controller.dart';
+import '../services/notification_service.dart';
 
-/// Handles Pomodoro timer logic.
-/// Keeps business logic separate from UI.
 class TimerController {
   Timer? _timer;
 
@@ -20,8 +21,8 @@ class TimerController {
   }) : totalSeconds = focusMinutes * 60,
        remainingSeconds = focusMinutes * 60;
 
-  /// Starts the timer.
-  void start() {
+  /// Starts the timer for a specific task.
+  void start(Task task, String id) {
     if (isRunning) return;
     isRunning = true;
 
@@ -31,30 +32,33 @@ class TimerController {
         onTick();
       } else {
         stop();
+
+        // gọi ngay khi hết giờ
+        finishPomodoro(task);
+        NotificationService.show(
+          "Hoàn thành 1 phiên Pomodoro",
+          "${task.title} đã hoàn tất!",
+        );
         onFinish();
       }
     });
   }
 
-  /// Pauses the timer.
   void pause() {
     _timer?.cancel();
     isRunning = false;
   }
 
-  /// Resets the timer.
   void reset() {
     pause();
     remainingSeconds = totalSeconds;
   }
 
-  /// Updates Pomodoro duration.
   void updateDuration(int minutes) {
     totalSeconds = minutes * 60;
     remainingSeconds = totalSeconds;
   }
 
-  /// Stops timer completely.
   void stop() {
     _timer?.cancel();
     isRunning = false;
@@ -62,5 +66,10 @@ class TimerController {
 
   void dispose() {
     _timer?.cancel();
+  }
+
+  void finishPomodoro(Task task) {
+    task.pomodoroCount++;
+    TaskController().saveTasks();
   }
 }

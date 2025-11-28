@@ -4,6 +4,7 @@ import '../widgets/timer_display.dart';
 import '../services/session_service.dart';
 import 'statistics_screen.dart';
 import '../screens/settings_screen.dart';
+import '../models/task.dart';
 
 class PomodoroScreen extends StatefulWidget {
   final int focusMinutes;
@@ -77,7 +78,7 @@ class _PomodoroScreenState extends State<PomodoroScreen>
   @override
   Widget build(BuildContext context) {
     final running = controller.isRunning;
-
+    final Task task = ModalRoute.of(context)!.settings.arguments as Task;
     // Khi chạy → bật animation, khi pause → dừng
     running ? animCtrl.forward() : animCtrl.stop();
 
@@ -163,7 +164,7 @@ class _PomodoroScreenState extends State<PomodoroScreen>
                         controller.pause();
                         animCtrl.stop(); // stop animation when paused
                       } else {
-                        controller.start();
+                        controller.start(task, task.id);
                         animCtrl.repeat(
                           reverse: true,
                         ); // restart animation smoothly
