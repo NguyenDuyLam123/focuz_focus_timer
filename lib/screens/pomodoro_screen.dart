@@ -78,7 +78,17 @@ class _PomodoroScreenState extends State<PomodoroScreen>
   @override
   Widget build(BuildContext context) {
     final running = controller.isRunning;
-    final Task task = ModalRoute.of(context)!.settings.arguments as Task;
+    final Task? task = ModalRoute.of(context)!.settings.arguments as Task?;
+    if (task == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            "Không có Task được chọn!",
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+      );
+    }
     // Khi chạy → bật animation, khi pause → dừng
     running ? animCtrl.forward() : animCtrl.stop();
 
