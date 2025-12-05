@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../logic/task_controller.dart';
+import '../models/task.dart';
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({super.key});
@@ -15,67 +16,93 @@ class _TaskScreenState extends State<TaskScreen> {
   @override
   void initState() {
     super.initState();
+    // load tasks từ storage khi mở màn hình
     controller.loadTasks().then((_) {
-      if (!mounted) return; // ← IMPORTANT
+      if (!mounted) return;
       setState(() {});
     });
   }
 
-  void addTaskDialog() {
-    showDialog(
+  @override
+  void dispose() {
+    input.dispose();
+    super.dispose();
+  }
+
+  Future<void> addTaskDialog() async {
+    input.clear();
+    await showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Thêm Task"),
-        content: TextField(controller: input),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await controller.addTask(input.text);
-
-              if (!mounted) return;
-
-              input.clear();
-              setState(() {});
-              Navigator.pop(context);
-            },
-            child: const Text("OK"),
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Tạo task mới'),
+          content: TextField(
+            controller: input,
+            autofocus: true,
+            decoration: const InputDecoration(hintText: 'Nhập tiêu đề task'),
+            onSubmitted: (_) => _addTaskFromDialog(),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: _addTaskFromDialog,
+              child: const Text('Thêm'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  void _addTaskFromDialog() async {
+    final text = input.text.trim();
+    if (text.isEmpty) return;
+    await controller.addTask(text);
+    // sau khi thêm, reload hoặc cập nhật local list
+    if (!mounted) return;
+    setState(() {});
+    input.clear();
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final tasks = controller.tasks;
     return Scaffold(
       appBar: AppBar(title: const Text("Task List")),
       floatingActionButton: FloatingActionButton(
         onPressed: addTaskDialog,
         child: const Icon(Icons.add),
       ),
-      body: ListView.builder(
-        itemCount: controller.tasks.length,
-        itemBuilder: (context, i) {
-          final task = controller.tasks[i];
-          return ListTile(
-            onTap: () {
-              Navigator.pushNamed(context, '/pomodoro', arguments: task);
-            },
-            title: Text(task.title),
-            subtitle: Text("Pomodoros: ${task.pomodoroCount}"),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                await controller.deleteTask(task.id);
-
-                if (!mounted) return;
-
-                setState(() {});
+      body: tasks.isEmpty
+          ? const Center(child: Text("Chưa có task nào. Nhấn + để tạo."))
+          : ListView.separated(
+              itemCount: tasks.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, i) {
+                final task = tasks[i];
+                return ListTile(
+                  title: Text(task.title),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async {
+                      await controller.deleteTask(task.id);
+                      if (!mounted) return;
+                      setState(() {});
+                    },
+                  ),
+                  onTap: () {
+                    // nếu muốn chuyển sang Pomodoro và truyền task
+                    Navigator.pushNamed(context, '/pomodoro', arguments: task);
+                  },
+                );
               },
             ),
-          );
-        },
-      ),
     );
   }
 }
