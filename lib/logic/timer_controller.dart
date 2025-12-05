@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../models/task.dart';
 import 'task_controller.dart';
 import '../services/notification_service.dart';
+import '../data/local/hive_service.dart';
+import '../data/models/session_model.dart';
 
 class TimerController {
   Timer? _timer;
@@ -71,5 +73,20 @@ class TimerController {
   void finishPomodoro(Task task) {
     task.pomodoroCount++;
     TaskController().saveTasks();
+  }
+
+  final hiveService = HiveService();
+
+  DateTime? _startTime;
+
+  void saveSession(int focus, int breakTime) {
+    final session = SessionModel(
+      focusMinutes: focus,
+      breakMinutes: breakTime,
+      startAt: _startTime!,
+      endAt: DateTime.now(),
+    );
+
+    hiveService.addSession(session);
   }
 }
