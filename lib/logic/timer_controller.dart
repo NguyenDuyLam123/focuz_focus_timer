@@ -9,6 +9,7 @@ import '../data/models/session_model.dart';
 class TimerController {
   Timer? _timer;
 
+  int focusMinutes;
   int totalSeconds;
   int remainingSeconds;
   bool isRunning = false;
@@ -17,7 +18,7 @@ class TimerController {
   final VoidCallback onFinish;
 
   TimerController({
-    required int focusMinutes,
+    required this.focusMinutes,
     required this.onTick,
     required this.onFinish,
   }) : totalSeconds = focusMinutes * 60,
@@ -88,5 +89,11 @@ class TimerController {
     );
 
     hiveService.addSession(session);
+  }
+
+  void updateFocusMinutes(int minutes) {
+    focusMinutes = minutes;
+    updateDuration(minutes); // cập nhật cả giây
+    reset();
   }
 }

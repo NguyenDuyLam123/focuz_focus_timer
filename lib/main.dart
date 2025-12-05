@@ -46,17 +46,6 @@ class _MyAppState extends State<MyApp> {
       home: PomodoroScreen(
         focusMinutes: focusMinutes,
         onChangeFocus: _saveSettings,
-        onOpenSettings: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SettingsScreen(
-                focusMinutes: focusMinutes,
-                onSave: _saveSettings,
-              ),
-            ),
-          );
-        },
       ),
     );
   }

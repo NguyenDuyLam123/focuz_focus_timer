@@ -9,13 +9,11 @@ import '../models/task.dart';
 class PomodoroScreen extends StatefulWidget {
   final int focusMinutes;
   final ValueChanged<int> onChangeFocus;
-  final VoidCallback onOpenSettings;
 
   const PomodoroScreen({
     super.key,
     required this.focusMinutes,
     required this.onChangeFocus,
-    required this.onOpenSettings,
   });
 
   @override
@@ -104,12 +102,13 @@ class _PomodoroScreenState extends State<PomodoroScreen>
                 context,
                 MaterialPageRoute(
                   builder: (_) => SettingsScreen(
-                    focusMinutes: widget.focusMinutes, // THAM SỐ 1 (bắt buộc)
+                    focusMinutes: widget.focusMinutes,
                     onSave: (newMinutes) {
-                      // THAM SỐ 2 (bắt buộc)
                       widget.onChangeFocus(newMinutes);
 
-                      // reset timer theo giá trị mới
+                      controller.updateFocusMinutes(
+                        newMinutes,
+                      ); // 🔥 thêm dòng này
                       setState(() {});
                     },
                   ),
