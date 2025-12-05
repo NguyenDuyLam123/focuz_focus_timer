@@ -12,6 +12,8 @@ class TaskController {
     if (data != null) {
       final decoded = jsonDecode(data) as List;
       tasks = decoded.map((e) => Task.fromJson(e)).toList();
+    } else {
+      tasks = [];
     }
   }
 
@@ -28,6 +30,26 @@ class TaskController {
 
   Future<void> deleteTask(String id) async {
     tasks.removeWhere((task) => task.id == id);
+    await saveTasks();
+  }
+
+  /// Trả về Task theo id hoặc null nếu không tìm thấy
+  Task? getTaskById(String id) {
+    try {
+      return tasks.firstWhere((t) => t.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Cập nhật task (tìm theo id và thay thế). Nếu không tồn tại thì thêm mới.
+  Future<void> updateTask(Task updated) async {
+    final idx = tasks.indexWhere((t) => t.id == updated.id);
+    if (idx >= 0) {
+      tasks[idx] = updated;
+    } else {
+      tasks.add(updated);
+    }
     await saveTasks();
   }
 }
